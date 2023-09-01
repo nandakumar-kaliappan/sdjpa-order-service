@@ -1,10 +1,10 @@
-DROP DATABASE IF EXISTS orderservice;
-DROP USER IF EXISTS `orderadmin`@`%`;
-DROP USER IF EXISTS `orderuser`@`%`;
-CREATE DATABASE IF NOT EXISTS orderservice CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER IF NOT EXISTS `orderadmin`@`%` IDENTIFIED WITH mysql_native_password BY 'password';
+DROP DATABASE  orderservice;
+DROP USER  `orderadmin`@`%`;
+DROP USER  `orderuser`@`%`;
+CREATE DATABASE  orderservice CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER  `orderadmin`@`%` IDENTIFIED BY 'password';
 GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, REFERENCES, INDEX, ALTER, EXECUTE, CREATE VIEW, SHOW VIEW,
     CREATE ROUTINE, ALTER ROUTINE, EVENT, TRIGGER ON `orderservice`.* TO `orderadmin`@`%`;
-CREATE USER IF NOT EXISTS `orderuser`@`%` IDENTIFIED WITH mysql_native_password BY 'password';
+CREATE USER  `orderuser`@`%` IDENTIFIED BY 'password';
 GRANT SELECT, INSERT, UPDATE, DELETE, SHOW VIEW ON `orderservice`.* TO `orderuser`@`%`;
 FLUSH PRIVILEGES;
