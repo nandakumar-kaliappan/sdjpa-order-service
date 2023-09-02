@@ -3,7 +3,9 @@ package com.knkweb.sdjpaorderservice;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import com.knkweb.sdjpaorderservice.domain.Address;
 import com.knkweb.sdjpaorderservice.domain.OrderHeader;
+import com.knkweb.sdjpaorderservice.domain.Product;
 import com.knkweb.sdjpaorderservice.repository.OrderHeaderRepository;
+import com.knkweb.sdjpaorderservice.repository.ProductRepository;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -22,6 +24,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class OrderHeaderIntegrationTest {
     @Autowired
     OrderHeaderRepository orderHeaderRepository;
+
+    @Autowired
+    ProductRepository productRepository;
 
 //    @Commit
     @Test
@@ -46,8 +51,16 @@ public class OrderHeaderIntegrationTest {
 
     @Test
     @Order(1)
-    void sampleTest(){
+    void productTest(){
+        Product product = Product.builder()
+                .description("some Desc")
+                .build();
+        Product productSaved = productRepository.save(product);
+        assertNotNull(productSaved);
 
+        Product productFetched = productRepository.findById(productSaved.getId()).get();
+        assertNotNull(productFetched);
+        assertEquals(productSaved, productFetched);
     }
 
 }
