@@ -19,4 +19,7 @@ public class OrderLine extends BaseEntity {
 
     @ManyToOne
     private OrderHeader orderHeader;
+
+    @ManyToOne
+    private Product product;
 }

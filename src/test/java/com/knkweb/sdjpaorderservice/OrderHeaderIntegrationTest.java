@@ -1,16 +1,10 @@
 package com.knkweb.sdjpaorderservice;
 
 import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
-import com.knkweb.sdjpaorderservice.domain.Address;
-import com.knkweb.sdjpaorderservice.domain.OrderHeader;
-import com.knkweb.sdjpaorderservice.domain.OrderLine;
-import com.knkweb.sdjpaorderservice.domain.Product;
+import com.knkweb.sdjpaorderservice.domain.*;
 import com.knkweb.sdjpaorderservice.repository.OrderHeaderRepository;
 import com.knkweb.sdjpaorderservice.repository.ProductRepository;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -31,7 +25,18 @@ public class OrderHeaderIntegrationTest {
     @Autowired
     ProductRepository productRepository;
 
-//    @Commit
+    Product product;
+
+    @BeforeEach
+    void setUp() {
+        product =
+                productRepository.saveAndFlush(Product.builder().description("Test product").productStatus(ProductStatus.NEW).build());
+
+
+
+    }
+
+    //    @Commit
     @Test
     @Order(1)
     void testOrderPersistance() {
@@ -53,8 +58,8 @@ public class OrderHeaderIntegrationTest {
     }
 
     @Test
-    @Order(1)
-    void productTest(){
+    @Order(2)
+    void productTest() {
         Product product = Product.builder()
                 .description("some Desc")
                 .build();
@@ -67,16 +72,35 @@ public class OrderHeaderIntegrationTest {
     }
 
     @Test
+    @Order(3)
     void testSaveOrderWithLine() {
         OrderHeader orderHeader = OrderHeader.builder().customerName("Test Customer").build();
         OrderLine orderLine = OrderLine.builder().quantityOrdered(5).build();
-        orderHeader.setOrderLines(Set.of(orderLine));
-        orderLine.setOrderHeader(orderHeader);
-
+//        orderHeader.setOrderLines(Set.of(orderLine));
+//        orderLine.setOrderHeader(orderHeader);
+        orderHeader.addOrderLine(orderLine);
         OrderHeader orderHeader1 = orderHeaderRepository.save(orderHeader);
 
         assertNotNull(orderHeader1);
         assertNotNull(orderHeader1.getOrderLines());
-        assertEquals(orderHeader1.getOrderLines().size(),1);
+        assertEquals(orderHeader1.getOrderLines().size(), 1);
+    }
+
+    @Test
+    @Order(4)
+    void testOrderLineWithProduct() {
+        OrderHeader orderHeader = OrderHeader.builder().customerName("Test Customer").build();
+        OrderLine orderLine = OrderLine.builder().quantityOrdered(5).build();
+//        orderHeader.setOrderLines(Set.of(orderLine));
+//        orderLine.setOrderHeader(orderHeader);
+        orderHeader.addOrderLine(orderLine);
+        orderLine.setProduct(product);
+        OrderHeader orderHeader1 = orderHeaderRepository.save(orderHeader);
+
+        assertNotNull(orderHeader1);
+        assertNotNull(orderHeader1.getOrderLines());
+        assertEquals(orderHeader1.getOrderLines().size(), 1);
+        assertNotNull(orderHeader1.getOrderLines().iterator().next().getProduct());
+        assertEquals(orderHeader1.getOrderLines().iterator().next().getProduct(),product);
     }
 }

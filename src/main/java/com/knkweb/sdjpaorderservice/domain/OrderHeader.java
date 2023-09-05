@@ -6,6 +6,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.util.HashSet;
 import java.util.Set;
 
 @NoArgsConstructor
@@ -50,7 +51,11 @@ public class OrderHeader extends BaseEntity {
     private Set<OrderLine> orderLines;
 
 
-
-
-
+    public void addOrderLine(OrderLine orderLine) {
+        if(orderLines == null){
+            orderLines = new HashSet<>();
+        }
+        orderLines.add(orderLine);
+        orderLine.setOrderHeader(this);
+    }
 }
