@@ -3,6 +3,7 @@ package com.knkweb.sdjpaorderservice;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import com.knkweb.sdjpaorderservice.domain.Address;
 import com.knkweb.sdjpaorderservice.domain.OrderHeader;
+import com.knkweb.sdjpaorderservice.domain.OrderLine;
 import com.knkweb.sdjpaorderservice.domain.Product;
 import com.knkweb.sdjpaorderservice.repository.OrderHeaderRepository;
 import com.knkweb.sdjpaorderservice.repository.ProductRepository;
@@ -14,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.annotation.Commit;
+
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -63,4 +66,17 @@ public class OrderHeaderIntegrationTest {
         assertEquals(productSaved, productFetched);
     }
 
+    @Test
+    void testSaveOrderWithLine() {
+        OrderHeader orderHeader = OrderHeader.builder().customerName("Test Customer").build();
+        OrderLine orderLine = OrderLine.builder().quantityOrdered(5).build();
+        orderHeader.setOrderLines(Set.of(orderLine));
+        orderLine.setOrderHeader(orderHeader);
+
+        OrderHeader orderHeader1 = orderHeaderRepository.save(orderHeader);
+
+        assertNotNull(orderHeader1);
+        assertNotNull(orderHeader1.getOrderLines());
+        assertEquals(orderHeader1.getOrderLines().size(),1);
+    }
 }

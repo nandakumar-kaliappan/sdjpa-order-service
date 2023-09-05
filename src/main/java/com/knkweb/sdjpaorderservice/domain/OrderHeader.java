@@ -6,13 +6,13 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.util.Set;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Getter
 @Setter
-@ToString
 @EqualsAndHashCode
 @AttributeOverrides({
         @AttributeOverride(
@@ -46,11 +46,11 @@ public class OrderHeader extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
 
-    @CreationTimestamp
-    @Column(updatable = false)
-    private Timestamp createdDate;
+    @OneToMany(mappedBy = "orderHeader", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    private Set<OrderLine> orderLines;
 
-    @UpdateTimestamp
-    private Timestamp lastModifiedDate;
+
+
+
 
 }
