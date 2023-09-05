@@ -103,4 +103,12 @@ public class OrderHeaderIntegrationTest {
         assertNotNull(orderHeader1.getOrderLines().iterator().next().getProduct());
         assertEquals(orderHeader1.getOrderLines().iterator().next().getProduct(),product);
     }
+
+    @Test
+    @Order(5)
+    void testfindByDescription() {
+        Product product = productRepository.findByDescription("Product 1");
+        assertNotNull(product);
+    }
+
 }
