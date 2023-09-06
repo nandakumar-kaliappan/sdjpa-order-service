@@ -36,8 +36,6 @@ import java.util.Set;
 @Entity
 public class OrderHeader extends BaseEntity {
 
-    private String customerName;
-
     @Embedded
     private Address billingAddress;
 
@@ -49,6 +47,9 @@ public class OrderHeader extends BaseEntity {
 
     @OneToMany(mappedBy = "orderHeader", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     private Set<OrderLine> orderLines;
+
+    @ManyToOne
+    private Customer customer;
 
 
     public void addOrderLine(OrderLine orderLine) {

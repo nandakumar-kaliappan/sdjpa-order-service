@@ -2,6 +2,7 @@ package com.knkweb.sdjpaorderservice;
 
 import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import com.knkweb.sdjpaorderservice.domain.*;
+import com.knkweb.sdjpaorderservice.repository.CustomerRepository;
 import com.knkweb.sdjpaorderservice.repository.OrderHeaderRepository;
 import com.knkweb.sdjpaorderservice.repository.ProductRepository;
 import org.junit.jupiter.api.*;
@@ -19,6 +20,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class OrderHeaderIntegrationTest {
+
+    @Autowired
+    CustomerRepository customerRepository;
+
     @Autowired
     OrderHeaderRepository orderHeaderRepository;
 
@@ -26,14 +31,17 @@ public class OrderHeaderIntegrationTest {
     ProductRepository productRepository;
 
     Product product;
+    Customer customer;
 
     @BeforeEach
     void setUp() {
         product =
                 productRepository.saveAndFlush(Product.builder().description("Test product").productStatus(ProductStatus.NEW).build());
-
-
-
+        Customer customerT =
+                Customer.builder().email("auihfd@sudh.com").phone("76548394875").address(Address.builder().address(
+                        "RGP").zipCode("245").build()).customerName(
+                "Test Customer").build();
+        customer = customerRepository.saveAndFlush(customerT);
     }
 
     //    @Commit
@@ -41,11 +49,11 @@ public class OrderHeaderIntegrationTest {
     @Order(1)
     void testOrderPersistance() {
         OrderHeader orderHeader =
-                OrderHeader.builder().customerName("john Thompson").billingAddress(Address.builder().address("RGP").zipCode("641602").build()).build();
+                OrderHeader.builder().customer(customer).billingAddress(Address.builder().address("RGP").zipCode("641602").build()).build();
         OrderHeader orderHeaderSaved = orderHeaderRepository.save(orderHeader);
         assertNotNull(orderHeaderSaved);
         assertNotNull(orderHeaderSaved.getId());
-        assertEquals(orderHeaderSaved.getCustomerName(), orderHeaderSaved.getCustomerName());
+        assertEquals(orderHeaderSaved.getCustomer().getCustomerName(), orderHeaderSaved.getCustomer().getCustomerName());
         assertEquals(orderHeader, orderHeaderSaved);
 
         OrderHeader orderHeaderFetched =
@@ -53,7 +61,7 @@ public class OrderHeaderIntegrationTest {
         assertNotNull(orderHeaderFetched);
         assertEquals("RGP", orderHeaderFetched.getBillingAddress().getAddress());
         assertNotNull(orderHeaderSaved.getId());
-        assertEquals(orderHeaderSaved.getCustomerName(), orderHeaderFetched.getCustomerName());
+        assertEquals(orderHeaderSaved.getCustomer().getCustomerName(), orderHeaderFetched.getCustomer().getCustomerName());
 
     }
 
@@ -74,7 +82,8 @@ public class OrderHeaderIntegrationTest {
     @Test
     @Order(3)
     void testSaveOrderWithLine() {
-        OrderHeader orderHeader = OrderHeader.builder().customerName("Test Customer").build();
+        OrderHeader orderHeader =
+                OrderHeader.builder().customer(customer).build();
         OrderLine orderLine = OrderLine.builder().quantityOrdered(5).build();
 //        orderHeader.setOrderLines(Set.of(orderLine));
 //        orderLine.setOrderHeader(orderHeader);
@@ -89,7 +98,7 @@ public class OrderHeaderIntegrationTest {
     @Test
     @Order(4)
     void testOrderLineWithProduct() {
-        OrderHeader orderHeader = OrderHeader.builder().customerName("Test Customer").build();
+        OrderHeader orderHeader = OrderHeader.builder().customer(customer).build();
         OrderLine orderLine = OrderLine.builder().quantityOrdered(5).build();
 //        orderHeader.setOrderLines(Set.of(orderLine));
 //        orderLine.setOrderHeader(orderHeader);
