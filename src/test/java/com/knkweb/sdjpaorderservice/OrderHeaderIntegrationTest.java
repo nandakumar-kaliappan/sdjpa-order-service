@@ -3,6 +3,7 @@ package com.knkweb.sdjpaorderservice;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import com.knkweb.sdjpaorderservice.domain.*;
 import com.knkweb.sdjpaorderservice.repository.CustomerRepository;
+import com.knkweb.sdjpaorderservice.repository.OrderApprovalRepository;
 import com.knkweb.sdjpaorderservice.repository.OrderHeaderRepository;
 import com.knkweb.sdjpaorderservice.repository.ProductRepository;
 import org.junit.jupiter.api.*;
@@ -30,8 +31,12 @@ public class OrderHeaderIntegrationTest {
     @Autowired
     ProductRepository productRepository;
 
+    @Autowired
+    OrderApprovalRepository orderApprovalRepository;
+
     Product product;
     Customer customer;
+    OrderApproval orderApproval;
 
     @BeforeEach
     void setUp() {
@@ -42,6 +47,9 @@ public class OrderHeaderIntegrationTest {
                         "RGP").zipCode("245").build()).customerName(
                 "Test Customer").build();
         customer = customerRepository.saveAndFlush(customerT);
+
+        orderApproval = orderApprovalRepository.saveAndFlush(OrderApproval.builder().approvedBy("me"
+        ).build());
     }
 
     //    @Commit
@@ -104,6 +112,7 @@ public class OrderHeaderIntegrationTest {
 //        orderLine.setOrderHeader(orderHeader);
         orderHeader.addOrderLine(orderLine);
         orderLine.setProduct(product);
+        orderHeader.setOrderApproval(orderApproval);
         OrderHeader orderHeader1 = orderHeaderRepository.save(orderHeader);
 
         assertNotNull(orderHeader1);
@@ -111,6 +120,8 @@ public class OrderHeaderIntegrationTest {
         assertEquals(orderHeader1.getOrderLines().size(), 1);
         assertNotNull(orderHeader1.getOrderLines().iterator().next().getProduct());
         assertEquals(orderHeader1.getOrderLines().iterator().next().getProduct(),product);
+        assertNotNull(orderHeader1.getOrderApproval());
+        assertEquals(orderHeader1.getOrderApproval(),orderApproval);
     }
 
     @Test

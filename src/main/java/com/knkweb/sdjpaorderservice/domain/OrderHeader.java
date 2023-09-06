@@ -51,6 +51,9 @@ public class OrderHeader extends BaseEntity {
     @ManyToOne
     private Customer customer;
 
+    @OneToOne
+    private OrderApproval orderApproval;
+
 
     public void addOrderLine(OrderLine orderLine) {
         if(orderLines == null){
