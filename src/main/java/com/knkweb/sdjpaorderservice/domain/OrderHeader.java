@@ -45,14 +45,20 @@ public class OrderHeader extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
 
-    @OneToMany(mappedBy = "orderHeader", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "orderHeader",
+            cascade = {CascadeType.REMOVE,CascadeType.PERSIST}, fetch = FetchType.EAGER)
     private Set<OrderLine> orderLines;
 
     @ManyToOne
     private Customer customer;
 
-    @OneToOne
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, mappedBy = "orderHeader")
     private OrderApproval orderApproval;
+
+    public void setOrderApproval(OrderApproval orderApproval){
+        this.orderApproval = orderApproval;
+        orderApproval.setOrderHeader(this);
+    }
 
 
     public void addOrderLine(OrderLine orderLine) {

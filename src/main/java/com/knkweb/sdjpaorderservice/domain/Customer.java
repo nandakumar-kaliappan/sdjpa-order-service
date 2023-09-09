@@ -24,5 +24,8 @@ public class Customer extends BaseEntity{
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<OrderHeader> orders = new LinkedHashSet<>();
 
+    @Version
+    private Integer version;
+
 
 }

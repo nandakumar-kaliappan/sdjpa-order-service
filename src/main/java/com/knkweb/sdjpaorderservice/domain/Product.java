@@ -8,11 +8,13 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Getter
+@Setter
 @EqualsAndHashCode
 @Entity
 public class Product extends BaseEntity {
     private String description;
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     @JoinTable(name = "product_category",
             inverseJoinColumns = @JoinColumn(name = "category_id"),
              joinColumns= @JoinColumn(name = "product_id"))
@@ -20,4 +22,6 @@ public class Product extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private ProductStatus productStatus;
+
+
 }

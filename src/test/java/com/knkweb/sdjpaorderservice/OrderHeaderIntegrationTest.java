@@ -6,16 +6,17 @@ import com.knkweb.sdjpaorderservice.repository.CustomerRepository;
 import com.knkweb.sdjpaorderservice.repository.OrderApprovalRepository;
 import com.knkweb.sdjpaorderservice.repository.OrderHeaderRepository;
 import com.knkweb.sdjpaorderservice.repository.ProductRepository;
+import org.hibernate.boot.model.source.spi.Orderable;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.annotation.Commit;
 
+import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -112,7 +113,7 @@ public class OrderHeaderIntegrationTest {
 //        orderLine.setOrderHeader(orderHeader);
         orderHeader.addOrderLine(orderLine);
         orderLine.setProduct(product);
-        orderHeader.setOrderApproval(orderApproval);
+        orderHeader.setOrderApproval(OrderApproval.builder().approvedBy("Someone").build());
         OrderHeader orderHeader1 = orderHeaderRepository.save(orderHeader);
 
         assertNotNull(orderHeader1);
@@ -121,7 +122,7 @@ public class OrderHeaderIntegrationTest {
         assertNotNull(orderHeader1.getOrderLines().iterator().next().getProduct());
         assertEquals(orderHeader1.getOrderLines().iterator().next().getProduct(),product);
         assertNotNull(orderHeader1.getOrderApproval());
-        assertEquals(orderHeader1.getOrderApproval(),orderApproval);
+        assertNotEquals(orderHeader1.getOrderApproval(),orderApproval);
     }
 
     @Test
@@ -131,4 +132,76 @@ public class OrderHeaderIntegrationTest {
         assertNotNull(product);
     }
 
+    @Order(6)
+    @Test
+    void testOrderApprovalBiDirection() {
+        OrderHeader orderHeader = OrderHeader.builder().customer(customer).build();
+
+        orderHeader.setOrderApproval(OrderApproval.builder().approvedBy("Someone").build());
+        OrderHeader orderHeader1 = orderHeaderRepository.save(orderHeader);
+
+        assertNotNull(orderHeader1);
+        assertNotNull(orderHeader1.getOrderApproval());
+        assertNotEquals(orderHeader1.getOrderApproval(),orderApproval);
+
+        OrderApproval orderApproval =
+                orderApprovalRepository.findById(orderHeader1.getOrderApproval().getId()).orElse(null);
+
+        assertEquals(orderApproval.getApprovedBy(),"Someone" );
+    }
+
+    @Order(7)
+    @Test
+    void testOrderApprovalBiDirectionAndDelete() {
+        OrderHeader orderHeader = OrderHeader.builder().customer(customer).build();
+
+        orderHeader.setOrderApproval(OrderApproval.builder().approvedBy("Someone").build());
+        OrderHeader orderHeader1 = orderHeaderRepository.save(orderHeader);
+
+        assertNotNull(orderHeader1);
+        assertNotNull(orderHeader1.getOrderApproval());
+        assertNotEquals(orderHeader1.getOrderApproval(),orderApproval);
+
+        orderHeaderRepository.delete(orderHeader1);
+
+        OrderApproval orderApproval =
+                orderApprovalRepository.findById(orderHeader1.getOrderApproval().getId()).orElse(null);
+
+        assertNull(orderApproval);
+    }
+
+    @Test
+    @Commit
+    void testLocking() {
+
+        Category categoryToiletry = Category.builder().description("Toiletry").build();
+        Category categoryFluid = Category.builder().description("Fluid").build();
+        Category categorySolid = Category.builder().description("Solid").build();
+
+        Product product =
+                Product.builder().description("brush").categories(Set.of(categoryToiletry,categorySolid)).build();
+        Product product1 = Product.builder().description("paste").categories(Set.of(categoryFluid
+                ,categoryToiletry)).build();
+
+        Product brushSaved = productRepository.saveAndFlush(product);
+        Product pasteSaved = productRepository.saveAndFlush(product1);
+
+
+        OrderLine orderLine = OrderLine.builder().quantityOrdered(50).product(brushSaved).build();
+        OrderLine orderLine1 = OrderLine.builder().quantityOrdered(40).product(pasteSaved).build();
+
+        Customer customer =
+                customerRepository.saveAndFlush(Customer.builder().customerName("sarath").phone(
+                        "75647547").build());
+        OrderHeader orderHeader = OrderHeader.builder()
+                .orderApproval(OrderApproval.builder().approvedBy("knk").build())
+                .billingAddress(Address.builder().address("tup").zipCode("8345").build())
+                .customer(customer)
+                .build();
+        orderHeader.addOrderLine(orderLine);
+        orderHeader.addOrderLine(orderLine1);
+
+        orderHeaderRepository.saveAndFlush(orderHeader);
+
+    }
 }
